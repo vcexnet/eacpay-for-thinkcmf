@@ -1,0 +1,100 @@
+
+    <script src="https://unpkg.com/layui@2.6.8/dist/layui.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/layui@2.6.8/dist/css/layui.css">
+    <script>
+        var $= layui.jquery;
+        var jQuery = $;
+    </script>
+    <style>
+        #eacpay{width: 800px;margin: 0 auto;position: relative;padding: 10px;}
+        .flex_row {display: flex;flex-direction: row;margin: 10px 0;}
+        .flex_row>b {width: 80px;}
+        .flex_col {display: flex;flex-direction: column;}
+        .flex_1 {flex: 1;}
+        .eacpay_remark{margin: 10px 0;}
+    </style>
+    <div id="eacpay" class="flex_row">
+        <div class="flex_1" style="margin-right: 20px;">
+            <table class="layui-table">
+                <thead>
+                    <tr>
+                        <td colspan="6">eacpay区块链支付 - 付款页面</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td width="180">订单价格:</td>
+                        <td><strong id="priceCount"><?php echo $amount;?></strong> <?php echo $currency;?></td>
+                    </tr>
+                    <tr>
+                        <td width="180">官方网站:</td>
+                        <td><strong><a href="http://www.eacpay.com" target="_blank">www.eacpay.com</a></strong></td>
+                    </tr>
+                    <tr>
+                        <td width="180">EAC即时价:</td>
+                        <td><strong id="exchangeData"><?php echo $exchangedata.' '.$currency;?></strong></td>
+                    </tr>
+                    <tr>
+                        <td width="180">约合EAC:</td>
+                        <td><strong id="eac"><?php echo $eac;?></strong></td>
+                    </tr>
+                    <tr>
+                        <td width="180">扫码支付:</td>
+                        <td>
+                            <img src="{:cmf_plugin_url('Eacpay://Index/qrcode',["eacpay_order_id"=>$order_id])}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <div id="eacpayresult">
+                                <div class="resultmsg" style="text-align: center;font-size: 16px;margin-bottom: 15px;">正在确认订单，请稍等...</div>
+                                <div class="loading" style="width: 100%;height: 8px;background: #999999;border-radius: 2px;">
+                                    <div class="bar" style="width: 0%;background: #ff5f00;height: 100%;transition: all 0.2s;border-radius: 2px;"></div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="eacpay_remark" style="background: #fff;">
+            <p>人民币现金 1元 = <?php echo round(1/$exchangedata,4);?>个eac</p>
+            <p>EACPAY手机端区块链钱包下载:</p>
+            <p>1、google play</p>
+            <p>2、<a href="http://www.eacpay.com" target="_blank">eacpay.com官网下载</a></p>
+            <p>3、手机浏览器扫一扫，下载EACPAY</p>
+            <img src="/plugins/eacpay/view/app.jpg" width="160" height="190"/>
+        </div>
+    </div>
+    <script>
+        $(function() {
+            var timeId = null;
+
+            function check() {
+                jQuery.getJSON('{:cmf_plugin_url('Eacpay://Index/check',["eacpay_order_id"=>$order_id])}', function(d) {
+                    if (d.code == "1") {
+                        clearInterval(timeId);
+                        jQuery('#eacpayresult .loading .bar').css('width','100%');
+                        $('#eacpayresult .resultmsg').html("付款成功");
+                        setTimeout(function() {
+                            location.href = d.url;
+                        }, 2000);
+                    }else if (d.code == "2") {
+                        jQuery('#eacpayresult .loading .bar').css('width',(parseInt(d.confirmations)/parseInt(d.receipt_confirmation))*100+'%');
+                        jQuery('#eacpayresult .resultmsg').html(d.msg);
+                    }else if (d.code == "3") {
+                        jQuery('#eacpayresult .loading .bar').css('width','100%');
+                        jQuery('#eacpayresult .resultmsg').html(d.msg);
+                    }else if (d.code == "4") {
+                        jQuery('#eacpayresult .loading .bar').css('width','0%');
+                        jQuery('#eacpayresult .resultmsg').html(d.msg);
+                    } else {
+                        clearInterval(timeId);
+                        jQuery('#eacpayresult .loading .bar').css('width','100%');
+                        jQuery('#eacpayresult .resultmsg').html(d.msg);
+                    }
+                });
+            }
+            timeId = setInterval(check, 3000);
+        })
+    </script>
