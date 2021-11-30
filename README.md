@@ -1,37 +1,36 @@
-# eacpay for thinkphp
+##Eacpay支付插件使用帮助
++ 插件丢插件目录下\public\plugins\
 
-#### 介绍
-eacpay for thinkphp，eacpay针对thinkphp的支付插件。
-
-#### 软件架构
-软件架构说明
-
-
-#### 安装教程
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 使用说明
-
-1.  xxxx
-2.  xxxx
-3.  xxxx
-
-#### 参与贡献
-
-1.  Fork 本仓库
-2.  新建 Feat_xxx 分支
-3.  提交代码
-4.  新建 Pull Request
++ 安装插件并配置各个参数<br>
+加入hook配置 \app\portal\hooks.php<br>
+ >
+    'eacpay' => [
+        "type"        => 3,
+        "name"        => '调用Eacpay支付',
+        "description" => "调用Eacpay支付",
+        "once"        => 0
+    ],
 
 
-#### 码云特技
++ 前台在需要使用eacpay的地方加上
+ >
+    <?php 
+        $order=array(
+            "out_trade_no"=>"订单号",
+            "amount"=>"金额",
+            "callback"=>"回调控制器,如:\app\portal\controller\ArticleController"
+        );
+    ?>
+    <hook name="eacpay" param="param"/>
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  码云官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解码云上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是码云最有价值开源项目，是码云综合评定出的优秀开源项目
-5.  码云官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  码云封面人物是一档用来展示码云会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
++ 在回调控制器中添加方法eacpay_notify;
+ >
+    function eacpay_notify(\$state=0,\$out_trade_no='',\$amount=0){
+        if(\$state == 1){
+            //用户已支付且金额一致
+        }elseif(\$state == 2){
+            //用户已支付,但是金额不一致
+        }else{
+        }
+    }
++ 后台同步钩子
